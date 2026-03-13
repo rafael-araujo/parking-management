@@ -1,0 +1,48 @@
+services:
+  simulator:
+    image: cfontes0estapar/garage-sim:1.0.0
+    container_name: parking-simulator
+    restart: unless-stopped
+    network_mode: host
+
+  db:
+    image: mysql:8.0
+    container_name: parking-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: parking_management
+      MYSQL_USER: parking
+      MYSQL_PASSWORD: parking123
+    ports:
+      - "3306:3306"
+    volumes:
+      - parking_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uparking", "-pparking123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  app:
+    build: .
+    container_name: parking-app
+    restart: on-failure
+    ports:
+      - "3003:3003"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/parking_management?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: parking
+      SPRING_DATASOURCE_PASSWORD: parking123
+      SIMULATOR_BASE_URL: http://host.docker.internal:3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
+      simulator:
+        condition: service_started
+
+volumes:
+  parking_db_data:
