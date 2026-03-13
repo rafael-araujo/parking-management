@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,7 +85,7 @@ public class SimulatorClient implements ApplicationRunner {
             GarageSectorEntity sector = sectorRepository.findById(cfg.getSector())
                     .orElse(new GarageSectorEntity());
             sector.setSector(cfg.getSector());
-            sector.setBasePrice(cfg.getBasePrice());
+            sector.setBasePrice(cfg.getBasePrice().setScale(2, RoundingMode.HALF_UP));
             sector.setMaxCapacity(cfg.getMaxCapacity());
             if (cfg.getControlType() != null) {
                 try {

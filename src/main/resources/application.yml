@@ -1,4 +1,7 @@
 spring:
+  jackson:
+    serialization:
+      write-bigdecimal-as-plain: true
   datasource:
     url: jdbc:mysql://localhost:3306/parking_management?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME:parking}
